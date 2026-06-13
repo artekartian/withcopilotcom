@@ -18,7 +18,7 @@ var posts=[
   {url:"cena.html",tag:"Licencje",title:"Ile kosztuje Copilot (Premium)? w PLN.",desc:"Cena, co zawiera, kiedy się zwraca. Konkretnie."},
   {url:"newsletter.html",tag:"Newsletter",title:"Pisanie – zabiera Ci czas",desc:"Mail lub dokument powstaje w kilka sekund. Bez poprawiania, bez zaczynania od zera."},
   {url:"anthropic.html",tag:"Model AI",title:"Copilot dostał drugi mózg — Claude Opus bez dopłat",desc:"Nowy model AI Anthropic w Twoim Copilot. Lepsze rozumowanie, dokumenty i analizy — 0 zł extra."},
-  {url:"frontier.html",tag:"Microsoft 365",title:"Frontier Firm — firma, w której AI pracuje obok ludzi",desc:"Czym jest Frontier Firm i jak w 3 krokach zmienić firmę w organizację, gdzie AI naprawdę pracuje."}
+  {url:"frontier.html",tag:"Frontier",title:"Frontier Firm — firma, w której AI pracuje obok ludzi",desc:"Czym jest Frontier Firm i jak w 3 krokach zmienić firmę w organizację, gdzie AI naprawdę pracuje."}
    
 ];
 
