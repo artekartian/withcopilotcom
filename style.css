@@ -158,7 +158,7 @@ img{max-width:100%;display:block}
   .map-p{min-height:280px}
   .map-p iframe{min-height:280px}
   .cp{padding:28px 20px}
-  .filters-bar{justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;scrollbar-width:none}
+  .filters-bar{justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;scrollbar-width:none;flex-wrap:nowrap}
   .filters-bar::-webkit-scrollbar{display:none}
 }
 @media(max-width:480px){
