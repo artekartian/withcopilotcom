@@ -39,7 +39,7 @@ img{max-width:100%;display:block}
 .mobile-menu a:hover{color:var(--text-bright)}
 
 /* INDEX HERO */
-.index-hero{padding:140px 24px 80px;text-align:center;background:radial-gradient(ellipse at 50% 0%,var(--brand-glow) 0%,transparent 60%)}
+.index-hero{padding:100px 24px 50px;text-align:center;background:radial-gradient(ellipse at 50% 0%,var(--brand-glow) 0%,transparent 60%);}
 .index-hero h1{font-size:clamp(2rem,5.5vw,3.2rem);font-weight:800;line-height:1.15;color:var(--text-bright);max-width:680px;margin:0 auto 16px}
 .index-hero h1 span{color:var(--brand-light)}
 .index-hero .subtitle{font-size:1.15rem;color:var(--text-dim);max-width:520px;margin:0 auto 32px}
@@ -175,5 +175,9 @@ img{max-width:100%;display:block}
 
 .post-card{display:flex;flex-direction:column}
 .post-card .read{margin-top:auto}
+
+
+#porady{padding-top:40px;scroll-margin-top:80px;}
+
 
 
