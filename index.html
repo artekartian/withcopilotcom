@@ -323,6 +323,164 @@ renderAllPosts("allPosts");
   });
 })();
 </script>
+<!-- ================= COOKIE BANNER ================= -->
+<div id="cookieBanner" role="dialog" aria-labelledby="cookieTitle" aria-describedby="cookieDesc">
+  <div class="cookieHead">
+    <div class="cookieIco">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10c0-.46-.03-.92-.1-1.36a4 4 0 0 1-5.54-5.54A10 10 0 0 0 12 2z"/><circle cx="8.5" cy="10.5" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="10" cy="16" r="1"/></svg>
+    </div>
+    <div>
+      <div id="cookieTitle" class="cookieTitle">Ciasteczka i prywatność</div>
+      <p id="cookieDesc" class="cookieDesc">
+        Używamy plików cookies, aby strona działała prawidłowo, mierzyć ruch (Google Analytics) i ulepszać treści. Możesz wybrać, na co się zgadzasz. Szczegóły w
+        <a href="https://valcreon.com/politykaprywatnosci.html" target="_blank" rel="noopener noreferrer">polityce prywatności</a>
+      </p>
+    </div>
+  </div>
+  <div class="cookieActions">
+    <button class="cookieBtn primary" onclick="acceptAllCookies()">Akceptuj wszystkie</button>
+    <button class="cookieBtn" onclick="acceptNecessaryCookies()">Tylko niezbędne</button>
+    <button class="cookieBtn" onclick="openCookieSettings()">Ustawienia</button>
+    <button class="cookieBtn settings" onclick="openCookieSettings()" style="display:none;">Dostosuj wybór</button>
+  </div>
+</div>
 
+<!-- ================= COOKIE SETTINGS MODAL ================= -->
+<div id="cookieModal" role="dialog" aria-labelledby="cookieModalTitle">
+  <div class="cookieModalBox">
+    <h3 id="cookieModalTitle">Ustawienia ciasteczek</h3>
+    <p>Wybierz, na które kategorie cookies wyrażasz zgodę. Możesz zmienić swój wybór w każdej chwili klikając ikonę w lewym dolnym rogu.</p>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Niezbędne</strong>
+          <p>Wymagane do działania strony – formularze, sesja, bezpieczeństwo. Nie można ich wyłączyć.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" checked disabled aria-label="Niezbędne – zawsze włączone">
+      </div>
+    </div>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Analityczne (Google Analytics 4)</strong>
+          <p>Pomagają zrozumieć, jak korzystasz ze strony – anonimowo, bez identyfikacji osobowej. Dzięki nim ulepszamy treści.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" id="cookieAnalytics" aria-label="Analityczne">
+      </div>
+    </div>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Marketingowe</strong>
+          <p>Pozwalają pokazywać Ci trafniejsze reklamy Valcreon w innych miejscach (Meta, LinkedIn). Wykorzystywane okazjonalnie.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" id="cookieMarketing" aria-label="Marketingowe">
+      </div>
+    </div>
+
+    <div class="cookieModalActions">
+      <button class="cookieBtn" onclick="closeCookieSettings()">Anuluj</button>
+      <button class="cookieBtn primary" onclick="saveCookieSettings()">Zapisz wybór</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FLOATING REOPEN ICON ================= -->
+<button id="cookieReopen" onclick="reopenCookieBanner()" aria-label="Ustawienia ciasteczek" title="Ustawienia ciasteczek">
+  <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10c0-.46-.03-.92-.1-1.36a4 4 0 0 1-5.54-5.54A10 10 0 0 0 12 2z"/><circle cx="8.5" cy="10.5" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="10" cy="16" r="1"/></svg>
+</button>
+
+<!-- ================= COOKIE LOGIC ================= -->
+<script>
+(function(){
+  const CONSENT_KEY='valcreon_cookie_consent';
+  const CONSENT_VERSION='1';
+  const CONSENT_DAYS=365;
+
+  // Google Consent Mode v2 – default: deny all
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag('consent','default',{
+    'analytics_storage':'denied',
+    'ad_storage':'denied',
+    'ad_user_data':'denied',
+    'ad_personalization':'denied',
+    'functionality_storage':'granted',
+    'security_storage':'granted'
+  });
+
+  function getStoredConsent(){
+    try{
+      const raw=localStorage.getItem(CONSENT_KEY);
+      if(!raw) return null;
+      const data=JSON.parse(raw);
+      if(data.v!==CONSENT_VERSION) return null;
+      if(Date.now()-data.t > CONSENT_DAYS*24*60*60*1000) return null;
+      return data;
+    }catch(e){return null;}
+  }
+
+  function saveConsent(analytics,marketing){
+    const data={v:CONSENT_VERSION,t:Date.now(),analytics:analytics,marketing:marketing};
+    localStorage.setItem(CONSENT_KEY,JSON.stringify(data));
+    applyConsent(analytics,marketing);
+    document.getElementById('cookieBanner').classList.remove('show');
+    document.getElementById('cookieModal').classList.remove('show');
+    document.getElementById('cookieReopen').classList.add('show');
+  }
+
+  function applyConsent(analytics,marketing){
+    gtag('consent','update',{
+      'analytics_storage':analytics?'granted':'denied',
+      'ad_storage':marketing?'granted':'denied',
+      'ad_user_data':marketing?'granted':'denied',
+      'ad_personalization':marketing?'granted':'denied'
+    });
+  }
+
+  window.acceptAllCookies=function(){saveConsent(true,true);};
+  window.acceptNecessaryCookies=function(){saveConsent(false,false);};
+  window.openCookieSettings=function(){
+    const stored=getStoredConsent();
+    document.getElementById('cookieAnalytics').checked=stored?stored.analytics:false;
+    document.getElementById('cookieMarketing').checked=stored?stored.marketing:false;
+    document.getElementById('cookieModal').classList.add('show');
+  };
+  window.closeCookieSettings=function(){
+    document.getElementById('cookieModal').classList.remove('show');
+  };
+  window.saveCookieSettings=function(){
+    const a=document.getElementById('cookieAnalytics').checked;
+    const m=document.getElementById('cookieMarketing').checked;
+    saveConsent(a,m);
+  };
+  window.reopenCookieBanner=function(){
+    document.getElementById('cookieReopen').classList.remove('show');
+    document.getElementById('cookieBanner').classList.add('show');
+  };
+
+  // Init on page load
+  document.addEventListener('DOMContentLoaded',function(){
+    const stored=getStoredConsent();
+    if(stored){
+      applyConsent(stored.analytics,stored.marketing);
+      document.getElementById('cookieReopen').classList.add('show');
+    }else{
+      setTimeout(function(){
+        document.getElementById('cookieBanner').classList.add('show');
+      },800);
+    }
+  });
+
+  // Close modal on backdrop click
+  document.getElementById('cookieModal').addEventListener('click',function(e){
+    if(e.target===this) closeCookieSettings();
+  });
+})();
+</script>
 </body>
 </html>
