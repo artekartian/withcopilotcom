@@ -164,6 +164,215 @@ observeAll();
 renderFilters("filters");
 renderAllPosts("allPosts");
 </script>
+<!-- ================= COOKIE BANNER ================= -->
+<div id="cookieBanner" role="dialog" aria-labelledby="cookieTitle" aria-describedby="cookieDesc">
+  <div class="cookieHead">
+    <div class="cookieIco">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10c0-.46-.03-.92-.1-1.36a4 4 0 0 1-5.54-5.54A10 10 0 0 0 12 2z"/><circle cx="8.5" cy="10.5" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="10" cy="16" r="1"/></svg>
+    </div>
+    <div>
+      <div id="cookieTitle" class="cookieTitle">Ciasteczka i prywatność</div>
+      <p id="cookieDesc" class="cookieDesc">
+        Używamy plików cookies, aby strona działała prawidłowo, mierzyć ruch (Google Analytics) i ulepszać treści. Możesz wybrać, na co się zgadzasz. Szczegóły w
+        <a href="https://valcreon.com/politykaprywatnosci.html" target="_blank" rel="noopener noreferrer">polityce prywatności</a>
+      </p>
+    </div>
+  </div>
+  <div class="cookieActions">
+    <button class="cookieBtn primary" onclick="acceptAllCookies()">Akceptuj wszystkie</button>
+    <button class="cookieBtn" onclick="acceptNecessaryCookies()">Tylko niezbędne</button>
+    <button class="cookieBtn" onclick="openCookieSettings()">Ustawienia</button>
+    <button class="cookieBtn settings" onclick="openCookieSettings()" style="display:none;">Dostosuj wybór</button>
+  </div>
+</div>
 
+<!-- ================= COOKIE SETTINGS MODAL ================= -->
+<div id="cookieModal" role="dialog" aria-labelledby="cookieModalTitle">
+  <div class="cookieModalBox">
+    <h3 id="cookieModalTitle">Ustawienia ciasteczek</h3>
+    <p>Wybierz, na które kategorie cookies wyrażasz zgodę. Możesz zmienić swój wybór w każdej chwili klikając ikonę w lewym dolnym rogu.</p>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Niezbędne</strong>
+          <p>Wymagane do działania strony – formularze, sesja, bezpieczeństwo. Nie można ich wyłączyć.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" checked disabled aria-label="Niezbędne – zawsze włączone">
+      </div>
+    </div>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Analityczne (Google Analytics 4)</strong>
+          <p>Pomagają zrozumieć, jak korzystasz ze strony – anonimowo, bez identyfikacji osobowej. Dzięki nim ulepszamy treści.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" id="cookieAnalytics" aria-label="Analityczne">
+      </div>
+    </div>
+
+    <div class="cookieCategory">
+      <div class="cookieCategoryHead">
+        <div>
+          <strong>Marketingowe</strong>
+          <p>Pozwalają pokazywać Ci trafniejsze reklamy Valcreon w innych miejscach (Meta, LinkedIn). Wykorzystywane okazjonalnie.</p>
+        </div>
+        <input type="checkbox" class="cookieToggle" id="cookieMarketing" aria-label="Marketingowe">
+      </div>
+    </div>
+
+    <div class="cookieModalActions">
+      <button class="cookieBtn" onclick="closeCookieSettings()">Anuluj</button>
+      <button class="cookieBtn primary" onclick="saveCookieSettings()">Zapisz wybór</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FLOATING REOPEN ICON ================= -->
+<button id="cookieReopen" onclick="reopenCookieBanner()" aria-label="Ustawienia ciasteczek" title="Ustawienia ciasteczek">
+  <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10c0-.46-.03-.92-.1-1.36a4 4 0 0 1-5.54-5.54A10 10 0 0 0 12 2z"/><circle cx="8.5" cy="10.5" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="10" cy="16" r="1"/></svg>
+</button>
+
+<!-- ================= COOKIE LOGIC ================= -->
+<script>
+(function(){
+  const CONSENT_KEY='valcreon_cookie_consent';
+  const CONSENT_VERSION='1';
+  const CONSENT_DAYS=365;
+
+  // Google Consent Mode v2 – default: deny all
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag('consent','default',{
+    'analytics_storage':'denied',
+    'ad_storage':'denied',
+    'ad_user_data':'denied',
+    'ad_personalization':'denied',
+    'functionality_storage':'granted',
+    'security_storage':'granted'
+  });
+
+  function getStoredConsent(){
+    try{
+      const raw=localStorage.getItem(CONSENT_KEY);
+      if(!raw) return null;
+      const data=JSON.parse(raw);
+      if(data.v!==CONSENT_VERSION) return null;
+      if(Date.now()-data.t > CONSENT_DAYS*24*60*60*1000) return null;
+      return data;
+    }catch(e){return null;}
+  }
+
+  function saveConsent(analytics,marketing){
+    const data={v:CONSENT_VERSION,t:Date.now(),analytics:analytics,marketing:marketing};
+    localStorage.setItem(CONSENT_KEY,JSON.stringify(data));
+    applyConsent(analytics,marketing);
+    document.getElementById('cookieBanner').classList.remove('show');
+    document.getElementById('cookieModal').classList.remove('show');
+    document.getElementById('cookieReopen').classList.add('show');
+  }
+
+  function applyConsent(analytics,marketing){
+    gtag('consent','update',{
+      'analytics_storage':analytics?'granted':'denied',
+      'ad_storage':marketing?'granted':'denied',
+      'ad_user_data':marketing?'granted':'denied',
+      'ad_personalization':marketing?'granted':'denied'
+    });
+  }
+
+  window.acceptAllCookies=function(){saveConsent(true,true);};
+  window.acceptNecessaryCookies=function(){saveConsent(false,false);};
+  window.openCookieSettings=function(){
+    const stored=getStoredConsent();
+    document.getElementById('cookieAnalytics').checked=stored?stored.analytics:false;
+    document.getElementById('cookieMarketing').checked=stored?stored.marketing:false;
+    document.getElementById('cookieModal').classList.add('show');
+  };
+  window.closeCookieSettings=function(){
+    document.getElementById('cookieModal').classList.remove('show');
+  };
+  window.saveCookieSettings=function(){
+    const a=document.getElementById('cookieAnalytics').checked;
+    const m=document.getElementById('cookieMarketing').checked;
+    saveConsent(a,m);
+  };
+  window.reopenCookieBanner=function(){
+    document.getElementById('cookieReopen').classList.remove('show');
+    document.getElementById('cookieBanner').classList.add('show');
+  };
+
+  // Init on page load
+  document.addEventListener('DOMContentLoaded',function(){
+    const stored=getStoredConsent();
+    if(stored){
+      applyConsent(stored.analytics,stored.marketing);
+      document.getElementById('cookieReopen').classList.add('show');
+    }else{
+      setTimeout(function(){
+        document.getElementById('cookieBanner').classList.add('show');
+      },800);
+    }
+  });
+
+  // Close modal on backdrop click
+  document.getElementById('cookieModal').addEventListener('click',function(e){
+    if(e.target===this) closeCookieSettings();
+  });
+})();
+</script>
+
+
+
+
+
+CSS
+
+/* ===== COOKIE BANNER ===== */
+#cookieBanner{position:fixed;bottom:20px;left:20px;right:20px;max-width:520px;margin:0 auto;z-index:9999;padding:24px;border-radius:20px;background:rgba(13,22,42,.96);border:1px solid rgba(124,92,255,.30);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 24px 60px rgba(0,0,0,.50),0 0 0 1px rgba(255,255,255,.04);color:var(--text);font-family:var(--font);animation:cookieSlideUp .4s cubic-bezier(.16,1,.3,1);display:none;}
+#cookieBanner.show{display:block;}
+@keyframes cookieSlideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.cookieHead{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.cookieIco{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c5cff,#5aa7ff);display:grid;place-items:center;flex-shrink:0;}
+.cookieIco svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.cookieTitle{font-size:1.05rem;font-weight:800;letter-spacing:-.2px;margin:0 0 4px;}
+.cookieDesc{font-size:.85rem;line-height:1.55;color:var(--muted);margin:0;}
+.cookieDesc a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;}
+.cookieActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.cookieBtn{padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(18,28,51,.50);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s;}
+.cookieBtn:hover{border-color:rgba(232,238,252,.18);background:rgba(18,28,51,.70);}
+.cookieBtn:active{transform:scale(.98);}
+.cookieBtn.primary{grid-column:1/-1;border-color:rgba(90,167,255,.40);background:linear-gradient(135deg,rgba(90,167,255,.90),rgba(124,92,255,.75));color:#071022;}
+.cookieBtn.primary:hover{border-color:rgba(90,167,255,.60);background:linear-gradient(135deg,rgba(90,167,255,1),rgba(124,92,255,.85));}
+.cookieBtn.settings{font-size:11.5px;letter-spacing:.3px;color:var(--muted);background:transparent;border-color:rgba(232,238,252,.06);}
+.cookieBtn.settings:hover{color:var(--text);border-color:rgba(232,238,252,.14);}
+@media(max-width:600px){#cookieBanner{left:12px;right:12px;bottom:12px;padding:20px;}.cookieActions{grid-template-columns:1fr;}}
+
+/* ===== COOKIE SETTINGS MODAL ===== */
+#cookieModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:10000;align-items:center;justify-content:center;padding:20px;}
+#cookieModal.show{display:flex;}
+.cookieModalBox{max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;border-radius:24px;background:rgba(13,22,42,.98);border:1px solid rgba(124,92,255,.25);box-shadow:0 32px 80px rgba(0,0,0,.60);animation:cookieSlideUp .35s cubic-bezier(.16,1,.3,1);}
+.cookieModalBox h3{margin:0 0 8px;font-size:1.4rem;font-weight:800;letter-spacing:-.3px;}
+.cookieModalBox > p{margin:0 0 24px;color:var(--muted);font-size:.92rem;line-height:1.6;}
+.cookieCategory{padding:18px;border-radius:16px;background:rgba(18,28,51,.50);border:1px solid var(--line);margin-bottom:12px;}
+.cookieCategoryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+.cookieCategoryHead strong{display:block;font-size:.98rem;margin-bottom:4px;}
+.cookieCategoryHead p{margin:0;font-size:.82rem;color:var(--muted);line-height:1.5;}
+.cookieToggle{position:relative;flex-shrink:0;width:44px;height:24px;border-radius:99px;background:rgba(232,238,252,.10);border:1px solid var(--line);cursor:pointer;transition:background .2s;appearance:none;-webkit-appearance:none;}
+.cookieToggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:99px;background:#fff;transition:transform .2s;}
+.cookieToggle:checked{background:linear-gradient(135deg,#7c5cff,#5aa7ff);border-color:transparent;}
+.cookieToggle:checked::after{transform:translateX(20px);}
+.cookieToggle:disabled{opacity:.7;cursor:not-allowed;}
+.cookieToggle:disabled::after{background:rgba(255,255,255,.7);}
+.cookieModalActions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+.cookieModalActions .cookieBtn{flex:1;}
+
+/* ===== FLOATING REOPEN ICON ===== */
+#cookieReopen{display:none;position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:14px;background:rgba(13,22,42,.85);border:1px solid rgba(124,92,255,.30);backdrop-filter:blur(12px);z-index:998;cursor:pointer;align-items:center;justify-content:center;color:var(--accent2);box-shadow:0 8px 20px rgba(0,0,0,.30);transition:transform .15s,border-color .15s;}
+#cookieReopen:hover{transform:scale(1.05);border-color:rgba(124,92,255,.50);}
+#cookieReopen.show{display:flex;}
+#cookieReopen svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 </body>
 </html>
